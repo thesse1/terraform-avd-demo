@@ -15,15 +15,32 @@ variable "subnet_range" {
   description = "Address range for session host subnet"
 }
 
-variable "rdsh_count" {
-  description = "Number of AVD machines to deploy"
+variable "rdsh_count_br" {
+  description = "Number of AVD machines to deploy fpr Browsers"
+  default     = 2
+}
+
+variable "rdsh_count_dt" {
+  description = "Number of AVD machines to deploy for Desktops"
   default     = 2
 }
 
 variable "prefix" {
   type        = string
   default     = "avdtf"
-  description = "Prefix of the name of the AVD machine(s)"
+  description = "Prefix of the name of the network resources"
+}
+
+variable "prefix_br" {
+  type        = string
+  default     = "avdtf-br"
+  description = "Prefix of the name of the AVD machine(s) for Browsers"
+}
+
+variable "prefix_dt" {
+  type        = string
+  default     = "avdtf-dt"
+  description = "Prefix of the name of the AVD machine(s) for Desktops"
 }
 
 variable "vm_size" {

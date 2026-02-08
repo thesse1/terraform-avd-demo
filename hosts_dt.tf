@@ -1,10 +1,10 @@
 locals {
-  registration_token = azurerm_virtual_desktop_host_pool_registration_info.registrationinfo.token
+  registration_token_dt = azurerm_virtual_desktop_host_pool_registration_info.registrationinfo_dt.token
 }
 
-resource "azurerm_network_interface" "avd_vm_nic" {
-  count               = var.rdsh_count
-  name                = "${var.prefix}-${count.index + 1}-nic"
+resource "azurerm_network_interface" "avd_vm_nic_dt" {
+  count               = var.rdsh_count_dt
+  name                = "${var.prefix_dt}-${count.index + 1}-nic"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
@@ -19,19 +19,19 @@ resource "azurerm_network_interface" "avd_vm_nic" {
   ]
 }
 
-resource "azurerm_windows_virtual_machine" "avd_vm" {
-  count                 = var.rdsh_count
-  name                  = "${var.prefix}-${count.index + 1}"
+resource "azurerm_windows_virtual_machine" "avd_vm_dt" {
+  count                 = var.rdsh_count_dt
+  name                  = "${var.prefix_dt}-${count.index + 1}"
   resource_group_name   = azurerm_resource_group.rg.name
   location              = azurerm_resource_group.rg.location
   size                  = var.vm_size
-  network_interface_ids = ["${azurerm_network_interface.avd_vm_nic.*.id[count.index]}"]
+  network_interface_ids = ["${azurerm_network_interface.avd_vm_nic_dt.*.id[count.index]}"]
   provision_vm_agent    = true
   admin_username        = var.local_admin_username
   admin_password        = var.local_admin_password
 
   os_disk {
-    name                 = "${lower(var.prefix)}-${count.index + 1}"
+    name                 = "${lower(var.prefix_dt)}-${count.index + 1}"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -45,7 +45,7 @@ resource "azurerm_windows_virtual_machine" "avd_vm" {
 
   depends_on = [
     azurerm_resource_group.rg,
-    azurerm_network_interface.avd_vm_nic
+    azurerm_network_interface.avd_vm_nic_dt
   ]
 
   lifecycle {
@@ -53,20 +53,20 @@ resource "azurerm_windows_virtual_machine" "avd_vm" {
   }
 }
 
-resource "azurerm_virtual_machine_extension" "entraid_join" {
-  count                      = var.rdsh_count
-  name                       = "${var.prefix}-${count.index + 1}-entraidJoin"
-  virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm.*.id[count.index]
+resource "azurerm_virtual_machine_extension" "entraid_join_dt" {
+  count                      = var.rdsh_count_dt
+  name                       = "${var.prefix_dt}-${count.index + 1}-entraidJoin"
+  virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm_dt.*.id[count.index]
   publisher                  = "Microsoft.Azure.ActiveDirectory"
   type                       = "AADLoginForWindows"
   type_handler_version       = "2.2"
   auto_upgrade_minor_version = true
 }
 
-resource "azurerm_virtual_machine_extension" "vmext_dsc" {
-  count                      = var.rdsh_count
-  name                       = "${var.prefix}${count.index + 1}-avd_dsc"
-  virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm.*.id[count.index]
+resource "azurerm_virtual_machine_extension" "vmext_dsc_dt" {
+  count                      = var.rdsh_count_dt
+  name                       = "${var.prefix_dt}${count.index + 1}-avd_dsc"
+  virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm_dt.*.id[count.index]
   publisher                  = "Microsoft.Powershell"
   type                       = "DSC"
   type_handler_version       = "2.73"
@@ -77,7 +77,7 @@ resource "azurerm_virtual_machine_extension" "vmext_dsc" {
       "modulesUrl": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration_1.0.02714.342.zip",
       "configurationFunction": "Configuration.ps1\\AddSessionHost",
       "properties": {
-        "HostPoolName":"${azurerm_virtual_desktop_host_pool.hostpool.name}"
+        "HostPoolName":"${azurerm_virtual_desktop_host_pool.hostpool_dt.name}"
       }
     }
 SETTINGS
@@ -85,13 +85,13 @@ SETTINGS
   protected_settings = <<PROTECTED_SETTINGS
   {
     "properties": {
-      "registrationInfoToken": "${local.registration_token}"
+      "registrationInfoToken": "${local.registration_token_dt}"
     }
   }
 PROTECTED_SETTINGS
 
   depends_on = [
-    azurerm_virtual_desktop_host_pool.hostpool,
-    azurerm_virtual_machine_extension.entraid_join
+    azurerm_virtual_desktop_host_pool.hostpool_dt,
+    azurerm_virtual_machine_extension.entraid_join_dt
   ]
 }
