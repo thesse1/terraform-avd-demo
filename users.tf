@@ -19,13 +19,13 @@ data "azurerm_role_definition" "role" { # access an existing built-in role
 # }
 
 # resource "azurerm_role_assignment" "role" {
-#   scope              = azurerm_virtual_desktop_application_group.dag.id
+#   scope              = azurerm_virtual_desktop_application_group.appgroup.id
 #   role_definition_id = data.azurerm_role_definition.role.id
 #   principal_id       = azuread_group.aad_group.id
 # }
 
 # resource "azurerm_role_assignment" "role" {
-#   scope              = azurerm_virtual_desktop_application_group.dag.id
+#   scope              = azurerm_virtual_desktop_application_group.appgroup.id
 #   role_definition_id = data.azurerm_role_definition.role.id
 #   principal_id       = "dd281078-86ee-4c03-beca-8e83f833c6d1"
 # }
